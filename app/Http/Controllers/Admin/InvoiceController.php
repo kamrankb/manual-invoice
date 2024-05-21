@@ -161,10 +161,14 @@ class InvoiceController extends Controller
     public function edit($id) {
         $page["title"] = "Edit Invoice - ".env('App_NAME');
 
-        $invoice = Invoice::with('payment.link.categories')
-                    ->find($id);
+        $invoice = Invoice::select('id', 'invoice_no', 'created_by', 'issue_date', 'heading', 'total', 'created_at')
+                    ->with([
+                        'invoiceItems:id,invoice_id,HAWB,date,description,service,unit,qty,rate,total,created_at',
+                        'account:id,first_name,last_name',
+                    ])
+                    ->where('id', $id)
+                    ->first();
 
-        
         return Inertia::render('Admin/Invoice/Edit', [
             'page' => $page,
             'invoice' => $invoice,
@@ -174,6 +178,12 @@ class InvoiceController extends Controller
     public function update(Request $request, $id) {
         try {
             $rules =  [
+                'invoice_id' => [
+                    'nullable',
+                    Rule::exists('invoice', 'id')->where(function ($query) use ($request) {
+                        return $request->filled('invoice_id');
+                    }),
+                ],
                 'accountID' => [
                     'nullable',
                     Rule::exists('users', 'id')->where(function ($query) use ($request) {
@@ -186,7 +196,7 @@ class InvoiceController extends Controller
                 'items.*' => 'required|array',
                 'items.*.HAWB' => 'required',
                 'items.*.date' => 'required',
-                'items.*.desc' => 'required',
+                'items.*.description' => 'required',
                 'items.*.service' => 'required',
                 'items.*.unit' => 'required',
                 'items.*.qty' => 'required',
@@ -204,21 +214,20 @@ class InvoiceController extends Controller
 
             $validatorData = $validator->validated();
 
-            $invoice = Invoice::create([
-                'invoice_no' => $request->input('invoiceNumber'),
-                'heading' => $request->input('heading'),
-                'issue_date' => $request->input('issueDate'),
-                'total' => $request->input('total'),
-                'created_by' => $request->input('accountID'),
-            ]);
+            $invoice = Invoice::find($id);
+            $invoice->invoice_no = $request->input('invoiceNumber');
+            $invoice->heading = $request->input('heading');
+            $invoice->issue_date = $request->input('issueDate');
+            $invoice->total = $request->input('total');
+            $invoice->created_by = $request->input('accountID');
 
-
+            $invoice->invoiceItems()->delete();
             foreach($request->input('items') as $item) {
                 $invoice->invoiceItems()->create([
                     'invoice_id' => $invoice,
                     'HAWB' => $item['HAWB'],
                     'date' => $item['date'],
-                    'description' => $item['desc'],
+                    'description' => $item['description'],
                     'service' => $item['service'],
                     'unit' => $item['unit'],
                     'qty' => $item['qty'],
@@ -229,7 +238,7 @@ class InvoiceController extends Controller
             DB::commit();
 
             Session::flash('success', true);
-            Session::flash('message', 'Invoice intertion succussefulyy.');
+            Session::flash('message', 'Invoice updated succussefulyy.');
 
             return Redirect::route('admin.invoice.list');
         } catch(Exception $e) {
