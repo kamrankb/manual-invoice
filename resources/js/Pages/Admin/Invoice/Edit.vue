@@ -140,6 +140,10 @@
         </div>
     </div>
   </form>
+
+  <Head>
+    <title>{{ props.page.title }}</title>
+  </Head>
 </template>
 
 <script setup>

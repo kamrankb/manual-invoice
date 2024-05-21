@@ -140,6 +140,9 @@
         </div>
     </div>
   </form>
+  <Head>
+    <title>{{ props.page.title }}</title>
+  </Head>
 </template>
 
 <script setup>
@@ -150,6 +153,7 @@ import { router, useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 
 const props = defineProps({
+  page: Object,
   data: Object,
   errors: Object,
   selected_customer_id: Number,
