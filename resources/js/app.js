@@ -5,7 +5,7 @@ import Layout from "../js/Pages/Admin/Shared/Layout/Main.vue"
 
 createInertiaApp({
     resolve: async name => {
-        const page = (await import(`./Pages/${name}.vue`)).default;
+        const page = require(`./Pages/${name}`).default;
 
         if (!page.layout) {
             page.layout ??= name.startsWith('Admin/') ? Layout : undefined;
