@@ -23,10 +23,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/invoice', 'list')->name('admin.invoice.list');
         Route::get('/invoice/create/', 'create')->name('admin.invoice.create');
         Route::post('/invoice/create', 'store')->name('admin.invoice.store');
-        Route::get('/invoice/detail/{id?}', 'detail')->name('admin.invoice.detail.id');
         Route::get('/invoice/edit/{id?}', 'edit')->name('admin.invoice.edit');
         Route::post('/invoice/update/{id}', 'update')->name('admin.invoice.update');
         Route::get('/invoice/delete/{invoiceID}', 'delete')->name('admin.invoice.delete');
+
+        Route::get('/invoice/find/', 'search')->name('admin.invoice.find');
+        Route::post('/invoice/find/invoices/{accountID}', 'getInvoicesByAccountID')->name('admin.invoice.find.invoices');
     });
 });
 

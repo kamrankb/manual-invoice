@@ -20,8 +20,15 @@
         <ul class="navbar-nav" id="navbar-nav">
           <li class="nav-item">
             <Link :href="route('admin.invoice.list')" :class="{ 'active': $page.url.startsWith('/admin/dashboard'), 'nav-link menu-link': true }">
-              <i class="ri-dashboard-2-line"></i>
+              <i class="las la-file-invoice"></i>
               <span data-key="t-dashboards">Invoice</span>
+            </Link>
+          </li>
+
+          <li class="nav-item">
+            <Link :href="route('admin.invoice.find')" :class="{ 'active': $page.url.startsWith('/admin/dashboard'), 'nav-link menu-link': true }">
+              <i class="mdi mdi-magnify"></i>
+              <span data-key="t-dashboards">Find Invoice</span>
             </Link>
           </li>
         </ul>

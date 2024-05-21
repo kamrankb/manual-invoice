@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\InvoiceItems;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -269,5 +270,39 @@ class InvoiceController extends Controller
                 "message" => $ex->getMessage()
             ]);
         }
+    }
+
+
+    public function search(Request $request) {
+        $page["title"] = "Search Invoice - ".env('App_NAME');
+        $data['accounts'] = User::select('id','first_name','last_name')->get();
+
+        return Inertia::render('Admin/Invoice/Detail', [
+            'page' => $page,
+            'data' => $data
+        ]);
+    }
+
+    public function getInvoicesByAccountID(Request $request, $accountID) {
+        $data['success'] = false;
+
+        try {
+            if($accountID > 0 ) {
+                $invoices = Invoice::select('id', 'invoice_no', 'created_by', 'issue_date', 'heading', 'total', 'created_at')
+                        ->with([
+                            'invoiceItems:id,invoice_id,HAWB,date,description,service,unit,qty,rate,total,created_at',
+                            'account:id,first_name,last_name',
+                        ])
+                        ->where('created_by', $accountID)
+                        ->get();
+                $data['success'] = true;
+                $data['data'] = $invoices;
+            } else {
+                $data['message'] = 'Account not exists';
+            }
+        } catch(Exception $e) {
+            $data['message'] = $e->getMessage();
+        }
+        return response()->json($data);
     }
 }
