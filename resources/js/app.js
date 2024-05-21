@@ -4,11 +4,11 @@ import route from "ziggy-js";
 import Layout from "../js/Pages/Admin/Shared/Layout/Main.vue"
 
 createInertiaApp({
-    resolve: name => {
-        let page = require(`./Pages/${name}`).default;
+    resolve: async name => {
+        const page = (await import(`./Pages/${name}.vue`)).default;
 
-        if(!page.layout) {
-            page.layout ??=  name.startsWith('Admin/') ? Layout : undefined;
+        if (!page.layout) {
+            page.layout ??= name.startsWith('Admin/') ? Layout : undefined;
         }
 
         return page;
